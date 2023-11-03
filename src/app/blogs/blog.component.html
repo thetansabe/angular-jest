@@ -1,0 +1,39 @@
+<div class="limit">
+    <section>
+      <div class="main">
+        <div class="post" *ngFor="let poke of pokemons$ | async; let index">
+          <div class="left">
+            <h1>{{ poke.name }}</h1>
+            <p>
+              {{ poke.url }}
+            </p>
+          </div>
+  
+          <div class="right">
+          <img [src]="'https://picsum.photos/80/80?random=' + index" alt="avatar" />
+        </div>
+        </div>
+  
+        <!-- <div
+          infiniteScroll
+          [infiniteScrollDistance]="1"
+          [infiniteScrollThrottle]="500"
+          (scrolled)="onScroll()"
+        ></div>
+  
+        <app-loading *ngIf="!isFinished"></app-loading> -->
+      </div>
+  
+      <div class="hightlight">
+        <div class="box">
+          <h2>Recommended topics</h2>
+          <div class="box-content">
+            <button>Rust</button>
+            <button>Cloud Computing</button>
+            <button>Sre</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  
