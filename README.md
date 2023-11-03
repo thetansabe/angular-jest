@@ -1,27 +1,123 @@
-# AngularJest
+# 🤵🤵‍ Secret Agents - 📸 Snapshot testing
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.4.
+Demo project for snapshot testing based on [Angular](https://angular.io/) and [Jest](https://jestjs.io/). 
 
-## Development server
+Simple app with a list of secret agents and the ability to sort them.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## ⚙️ Setup Angular testing with Jest
 
-## Code scaffolding
+For my apps, I've decided to use Jest alongside Karma, for one major reason: 
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+>**To be able to add Jest snapshot testing without changes into an already existing project with Karma tests.**
 
-## Build
+1. Installing dependencies
+```bash
+npm install jest jest-preset-angular @types/jest --save-dev
+``` 
+2. In a root folder create the main config file
+ **jest.config.js**:
+ ```typescript
+module.exports = {
+    verbose: true,
+    preset: 'jest-preset-angular',
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+    testPathIgnorePatterns: ['<rootDir>/src/test.ts'],
+    testRegex: '(/__tests__/.*|(\\.|/)(jest.test|jest.spec|jest))\\.[jt]sx?$',
+    collectCoverageFrom: ['<rootDir>/src/**/*.(component|pipe|service|directive|resolver|guard|interceptor).ts']
+};
+ ```
+3. In a root folder create file **jest.setup.ts** and add the import:
+```typescript
+import 'zone.js';
+import 'zone.js/testing';
+import 'jest-preset-angular';
+import { TestBed } from "@angular/core/testing";
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from "@angular/platform-browser-dynamic/testing";
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+TestBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+```
+4. In **tsconfig.spec.json** change `"jasmine"` to `"jest"` in `compilerOptions.types`
+```json 
+"compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": [
+      "jest",
+      "node"
+    ]
+  }
+```
+5. To add Jest typings create a `global.d.ts` file in `<rootDir>` and add type import:
+```typescript
+import '@types/jest';
+```
+6. In your `package.json` add custom scripts in `"scripts"` object:
+```json
+"test:jest" : "jest --watch",
+"test:jest--c": "jest --coverage",
+"test:jest--u": "jest --updateSnapshot",
+```
 
-## Running unit tests
+🛎️ If you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your `tsconfig.json`:
+```json
+"esModuleInterop": true
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## 📸 Jest Snapshot configuration
 
-## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+1. You need to create `<name>.<type>.jest.spec.ts` file (e.g. `agent.component.jest.spec.ts`, `agent.service.jest.spec.ts, etc.`):
+>where `<name>` is class name (e.g. app, agent, etc.) and `<type>` is angular component type (e.g. component | service | directive, etc.). 
 
-## Further help
+2. Use basic testing template:
+```typescript
+describe('AgentComponent', () => {
+  let component: AgentComponent;
+  let fixture: ComponentFixture<AgentComponent>;
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ AgentComponent ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(AgentComponent);
+    component = fixture.componentInstance;
+  });
+});
+```
+3. Add snapshot test.
+
+To test layout markup: 
+```typescript
+  it('should renders markup to snapshot', () => {
+    expect(fixture).toMatchSnapshot();
+  });
+```
+To test object values:
+```typescript
+ it('[snapshot] should sort agents by name', () => {
+    const sortedAgents = component.sortByName();
+    expect(sortedAgents).toMatchSnapshot();
+  });
+```
+4. Run tests
+`npm run test:jest`
+
+5. To update snapshots run `npm run test:jest--u` or press <kbd>U</kbd> in the watch mode.
+
+## If there is an error on expect(fixture).toMatchSnapshot():
+
+
+Remove @type/jasmine (this cause conflict with @type/jest):
+- Go to package.json delete @type/jasmine, delete package.json file and node_modules. Then npm i again.
+- Or: npm remove @types/jasmine
+
+## 📢 Feedback 
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## 📄 Ref
+[alexander-panchuk-oril](https://github1s.com/alexander-panchuk-oril/angular-snapshot-demo/blob/HEAD/README.md#L1-L125)
